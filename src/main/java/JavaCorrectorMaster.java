@@ -1,3 +1,10 @@
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,7 +37,7 @@ public class JavaCorrectorMaster{
     }
     public static Job getNextJob() {
         //TODO: De momento lo hacemos ficticios
-        return new Job("Afortunados", 9);
+        return new Job("Afortunados", 10);
 
     }
     private static void createDirAndCopyFiles(String className, String dirName) throws IOException{
@@ -53,29 +60,39 @@ public class JavaCorrectorMaster{
     }
     private static void runDocker(){
 
-        try {
-            final Job nextJob = getNextJob();
+        final Job nextJob = getNextJob();
 
-            if (nextJob == null) return;
+        if (nextJob == null) return;
 
-
+        new Thread(()-> {
             final String program = nextJob.getProgram();
-            createDirAndCopyFiles(program, Long.toString(nextJob.getJobID()));
-            final Runtime re = Runtime.getRuntime();
-            //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
-            //final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrector/io:/application/io --name javacorrector victorponz/javacorrector:v0 " + program + " job" + nextJob.getJobID());
-            System.out.println("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program  + " " + Long.toString(nextJob.getJobID()));
-            final Process command = re.exec("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program  + " /io/" + Long.toString(nextJob.getJobID()));
-            // Wait for the application to Fin
-            command.waitFor();
+            try {
+                createDirAndCopyFiles(program, Long.toString(nextJob.getJobID()));
+                final Runtime re = Runtime.getRuntime();
+                //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
+                //final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrector/io:/application/io --name javacorrector victorponz/javacorrector:v0 " + program + " job" + nextJob.getJobID());
+                System.out.println("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " " + Long.toString(nextJob.getJobID()));
+                final Process command = re.exec("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " /io/" + Long.toString(nextJob.getJobID()));
+                // Wait for the application to Fin
+                command.waitFor();
 
 
-            if (command.exitValue()!= 0) {
-                throw new IOException("Failed to execute jar, " );
+                if (command.exitValue() != 0) {
+                    throw new IOException("Failed to execute jar, ");
+                }else{
+                    parseResults(Long.toString(nextJob.getJobID()));
+                }
+            }catch (final IOException | InterruptedException | ParserConfigurationException | SAXException e){
+                System.out.println(e.getMessage());
             }
-
-        } catch (final IOException | InterruptedException e) {
-            System.out.println(e.getMessage());
-        }
+        }).start();
+    }
+    public static void parseResults(String id) throws IOException, ParserConfigurationException, SAXException {
+        //System.out.println(hijos.item(0).getNodeName()); // el primer hijo es el retorno de carro.
+        Document doc;
+        Element root;
+        doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(System.getProperty("user.dir") + "/io/" + id + "/results.xml");
+        root = doc.getDocumentElement(); // apuntarà al elemento raíz.
+        System.out.println(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
     }
 }
