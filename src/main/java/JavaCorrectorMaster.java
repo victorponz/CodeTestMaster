@@ -55,7 +55,7 @@ public class JavaCorrectorMaster{
             Files.copy(source, target);
         } catch (IOException e) {
             // Handle the error
-            System.err.println("Failed to create directory2: " + e.getMessage());
+            System.err.println("Failed to create directory: " + e.getMessage());
         }
     }
     private static void runDocker(){
@@ -70,15 +70,14 @@ public class JavaCorrectorMaster{
                 createDirAndCopyFiles(program, Long.toString(nextJob.getJobID()));
                 final Runtime re = Runtime.getRuntime();
                 //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
-                //final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrector/io:/application/io --name javacorrector victorponz/javacorrector:v0 " + program + " job" + nextJob.getJobID());
-                System.out.println("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " " + Long.toString(nextJob.getJobID()));
-                final Process command = re.exec("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " /io/" + Long.toString(nextJob.getJobID()));
+                String c = "docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " /io/" + Long.toString(nextJob.getJobID());
+                System.out.println(c);
+                final Process command = re.exec(c);
                 // Wait for the application to Fin
                 command.waitFor();
 
-
                 if (command.exitValue() != 0) {
-                    throw new IOException("Failed to execute jar, ");
+                    throw new IOException("Failed to execute jar");
                 }else{
                     parseResults(Long.toString(nextJob.getJobID()));
                 }
