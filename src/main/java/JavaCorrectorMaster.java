@@ -9,7 +9,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
-public class JavaCorrectorMaster{
+public class JavaCorrectorMaster {
+    private enum RESULTCODE{
+        OK,
+        COMPILE_ERROR,
+        TEST_ERROR
+    }
     public static void main(String[] args) {
 
         /*Va a haber un ciclo continuo
@@ -87,11 +92,17 @@ public class JavaCorrectorMaster{
         }).start();
     }
     public static void parseResults(String id) throws IOException, ParserConfigurationException, SAXException {
-        //System.out.println(hijos.item(0).getNodeName()); // el primer hijo es el retorno de carro.
         Document doc;
         Element root;
         doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(System.getProperty("user.dir") + "/io/" + id + "/results.xml");
         root = doc.getDocumentElement(); // apuntarà al elemento raíz.
-        System.out.println(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
+        int resultCode = Integer.parseInt(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
+        System.out.println(resultCode);
+        // resultCode = RESULTCODE.OK => Correcto
+        // resultCode = RESULTCODE.COMPILE_ERROR => No compila. Los errores están en el tag <error>
+        // resultCode = RESULTCODE.TEST_ERROR => Error en el test. Los errores están en el tag <error>
+
+
+
     }
 }
