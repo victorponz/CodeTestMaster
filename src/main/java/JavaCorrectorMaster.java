@@ -19,6 +19,9 @@ import java.sql.Statement;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 public class JavaCorrectorMaster {
     private enum RESULTCODE{
         OK,
@@ -27,6 +30,8 @@ public class JavaCorrectorMaster {
     }
     private static ConfigLoader conf;
     private static java.sql.Connection con;
+    private static final Logger logger = LogManager.getLogger(JavaCorrectorMaster.class);
+
     public static void main(String[] args) throws SQLException {
 
         /*Va a haber un ciclo continuo
@@ -48,15 +53,13 @@ public class JavaCorrectorMaster {
         conf = new ConfigLoader();
         con = AppService.getConnection();
 
-        try (ScheduledExecutorService executor = Executors.newScheduledThreadPool(1)) {
-            Runnable task = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        runDocker();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+        try {
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            Runnable task = () -> {
+                try {
+                    runDocker();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             };
 
@@ -107,9 +110,11 @@ public class JavaCorrectorMaster {
                         }
                     }
                 }
+                logger.info("JobId " + job.getId() +  " - Directory exists. Contents removed");
                 System.out.println("Directory exists. Contents removed");
             } else {
                 Files.createDirectory(path);
+                logger.info("JobId " + job.getId() +  " - Directory created successfully");
                 System.out.println("Directory created successfully!");
             }
 
@@ -128,13 +133,15 @@ public class JavaCorrectorMaster {
             //Files.copy(source, target);
         } catch (IOException e) {
             // Handle the error
+            logger.error("JobId " + job.getId() +  " - Failed to create directory: " + e.getMessage());
             System.err.println("Failed to create directory: " + e.getMessage());
         }finally {
             if (fw != null) {
                 try {
                     fw.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("JobId " + job.getId() +  " - General Error " + e.getMessage());
+                    System.out.println(e.getMessage());
                 }
             }
         }
@@ -156,11 +163,12 @@ public class JavaCorrectorMaster {
         command.waitFor();
 
         if (command.exitValue() != 0) {
+            logger.error("JobId " + nextJob.getId() +  " - to execute jar");
             throw new IOException("Failed to execute jar");
         }else{
             parseResults(Long.toString(nextJob.getId()));
         }
-
+        logger.info("JobId " + nextJob.getId() + " - ended successfully");
     }
     public static  void parseResults(String id) throws IOException, ParserConfigurationException, SAXException, SQLException {
         Document doc;

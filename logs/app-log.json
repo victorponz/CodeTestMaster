@@ -1,0 +1,30 @@
+[
+  {
+  "instant" : {
+    "epochSecond" : 1718954212,
+    "nanoOfSecond" : 192800270
+  },
+  "thread" : "pool-2-thread-1",
+  "level" : "INFO",
+  "loggerName" : "JavaCorrectorMaster",
+  "message" : "JobId 1 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 29,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1718954214,
+    "nanoOfSecond" : 484364632
+  },
+  "thread" : "pool-2-thread-1",
+  "level" : "INFO",
+  "loggerName" : "JavaCorrectorMaster",
+  "message" : "JobId 1 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 29,
+  "threadPriority" : 5
+}
+]

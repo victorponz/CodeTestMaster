@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <RollingFile name="JSONFile" fileName="logs/app-log.json"
+                     filePattern="logs/app-log-%d{yyyy-MM-dd}-%i.json" append="true">
+            <JsonLayout complete="true" compact="false" eventEol="true" />
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="JSONFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
