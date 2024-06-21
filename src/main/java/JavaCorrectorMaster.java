@@ -1,7 +1,9 @@
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import java.io.FileWriter;
+import java.sql.PreparedStatement;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -9,13 +11,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 public class JavaCorrectorMaster {
     private enum RESULTCODE{
         OK,
         COMPILE_ERROR,
         TEST_ERROR
     }
-    public static void main(String[] args) {
+    private static ConfigLoader conf;
+    private static java.sql.Connection con;
+    public static void main(String[] args) throws SQLException {
 
         /*Va a haber un ciclo continuo
         Si hay algo que hacer:
@@ -33,49 +41,89 @@ public class JavaCorrectorMaster {
         //     System.out.println(line);
         // }
         // p.waitFor();
-        int nextJobIndex = 0;
+        conf = new ConfigLoader();
+        con = AppService.getConnection();
+
         do{
             runDocker();
-            nextJobIndex++;
-        }while(false);
+        }while(true);
         
     }
-    public static Job getNextJob() {
-        //TODO: De momento lo hacemos ficticios
-        return new Job("Afortunados", 10);
+    public static Job getNextJob() throws SQLException {
 
+        Program program = null;
+        Job job = null;
+        Statement st = con.createStatement();
+        Statement stJob = con.createStatement();
+
+
+        //Ejecutar la consulta, guardando los datos devueltos en un Resulset
+        ResultSet rs = stJob.executeQuery("SELECT * FROM jobs WHERE status = 0 LIMIT 1");
+        if (rs.next()){
+            ResultSet rsProgram = st.executeQuery("SELECT * FROM programs WHERE id = " + rs.getLong("id_program"));;
+            if (rsProgram.next()){
+                program = new Program(rsProgram.getInt("id"),
+                        rsProgram.getString("class_name"),
+                        rsProgram.getString(
+                                "source_code"),
+                        rsProgram.getString("source_code_test"));
+                job = new Job(rs.getLong("id"), rs.getString("source_code"), program);
+            }
+        }
+        rs.close();
+        return job;
     }
-    private static void createDirAndCopyFiles(String className, String dirName) throws IOException{
+    private static void createDirAndCopyFiles(Job job) throws IOException{
+        String dirName = Long.toString(job.getId());
+        String className = job.getProgram().getClassName();
+        FileWriter fw = null;
      	Path path = Paths.get(System.getProperty("user.dir") + "/io/" + dirName);
         try {
             // Create the directory
             Files.createDirectory(path);
             System.out.println("Directory created successfully!");
-            Path source = Paths.get(System.getProperty("user.dir") + "/" + className + ".java");
-            Path target = Paths.get(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + ".java");
-            Files.copy(source, target);
+
+            fw = new FileWriter(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + ".java");
+            fw.write(job.getSourceCode());
+            fw.close();
+            fw = new FileWriter(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + "Test.java");
+            fw.write(job.getProgram().getSourceCodeTest());
+            fw.close();
+            //Path source = Paths.get(System.getProperty("user.dir") + "/" + className + ".java");
+            //Path target = Paths.get(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + ".java");
+            //Files.copy(source, target);
            	
-            source = Paths.get(System.getProperty("user.dir") + "/" + className + "Test.java");
-            target = Paths.get(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + "Test.java");
-            Files.copy(source, target);
+            //source = Paths.get(System.getProperty("user.dir") + "/" + className + "Test.java");
+            //target = Paths.get(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + "Test.java");
+            //Files.copy(source, target);
         } catch (IOException e) {
             // Handle the error
             System.err.println("Failed to create directory: " + e.getMessage());
+        }finally {
+            if (fw != null) {
+                try {
+                    fw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
-    private static void runDocker(){
+    //TODO Me quedo en ver por qué se ejecuta indefinidamente el job 1
+    private static void runDocker() throws SQLException {
 
         final Job nextJob = getNextJob();
 
         if (nextJob == null) return;
-
+        final String program = nextJob.getProgram().getClassName();
+        updateJobInProgress(nextJob.getId());
         new Thread(()-> {
-            final String program = nextJob.getProgram();
+
             try {
-                createDirAndCopyFiles(program, Long.toString(nextJob.getJobID()));
+                createDirAndCopyFiles(nextJob);
                 final Runtime re = Runtime.getRuntime();
                 //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
-                String c = "docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " /io/" + Long.toString(nextJob.getJobID());
+                String c = "docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " /io/" + Long.toString(nextJob.getId());
                 System.out.println(c);
                 final Process command = re.exec(c);
                 // Wait for the application to Fin
@@ -84,25 +132,51 @@ public class JavaCorrectorMaster {
                 if (command.exitValue() != 0) {
                     throw new IOException("Failed to execute jar");
                 }else{
-                    parseResults(Long.toString(nextJob.getJobID()));
+                    parseResults(Long.toString(nextJob.getId()));
                 }
             }catch (final IOException | InterruptedException | ParserConfigurationException | SAXException e){
                 System.out.println(e.getMessage());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         }).start();
     }
-    public static void parseResults(String id) throws IOException, ParserConfigurationException, SAXException {
+    public static  void parseResults(String id) throws IOException, ParserConfigurationException, SAXException, SQLException {
         Document doc;
         Element root;
         doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(System.getProperty("user.dir") + "/io/" + id + "/results.xml");
         root = doc.getDocumentElement(); // apuntarà al elemento raíz.
-        int resultCode = Integer.parseInt(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
-        System.out.println(resultCode);
+        int resultCodeInt = Integer.parseInt(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
+        System.out.println(resultCodeInt);
+        RESULTCODE resultCode = RESULTCODE.values()[resultCodeInt];
+        String error = "";
+        if (root.getElementsByTagName("error").getLength() > 0)
+            error = root.getElementsByTagName("error").item(0).getFirstChild().getNodeValue();
+
         // resultCode = RESULTCODE.OK => Correcto
         // resultCode = RESULTCODE.COMPILE_ERROR => No compila. Los errores están en el tag <error>
         // resultCode = RESULTCODE.TEST_ERROR => Error en el test. Los errores están en el tag <error>
+        updateJob(Long.parseLong(id), resultCodeInt, error);
 
+    }
+    private static void updateJob(long id, int resultCode, String error) throws SQLException {
+        ResultSet rs;
+        PreparedStatement st = null;
+        String query = "UPDATE jobs SET status = 2, result_code = ?, error = ? WHERE id = ?";
+        st = con.prepareStatement(query);
+        st.setInt(1, resultCode);
+        st.setString(2, error);
+        st.setLong(3, id);
 
+        st.executeUpdate();
+    }
+    private static void updateJobInProgress(long id) throws SQLException {
+        ResultSet rs;
+        PreparedStatement st = null;
+        String query = "UPDATE jobs SET status = 1 WHERE id = ?";
+        st = con.prepareStatement(query);
+        st.setLong(1, id);
 
+        st.executeUpdate();
     }
 }
