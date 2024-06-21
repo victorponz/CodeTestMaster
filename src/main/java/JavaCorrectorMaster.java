@@ -15,6 +15,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 public class JavaCorrectorMaster {
     private enum RESULTCODE{
         OK,
@@ -43,10 +46,22 @@ public class JavaCorrectorMaster {
         // p.waitFor();
         conf = new ConfigLoader();
         con = AppService.getConnection();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-        do{
-            runDocker();
-        }while(true);
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    runDocker();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        // Schedule the task to run every second
+        executor.scheduleAtFixedRate(task, 0, 100, TimeUnit.MILLISECONDS);
+
         
     }
     public static Job getNextJob() throws SQLException {
@@ -109,37 +124,28 @@ public class JavaCorrectorMaster {
             }
         }
     }
-    //TODO Me quedo en ver por qué se ejecuta indefinidamente el job 1
-    private static void runDocker() throws SQLException {
+    private static void runDocker() throws SQLException, IOException, InterruptedException, ParserConfigurationException, SAXException {
 
         final Job nextJob = getNextJob();
 
         if (nextJob == null) return;
         final String program = nextJob.getProgram().getClassName();
         updateJobInProgress(nextJob.getId());
-        new Thread(()-> {
+        createDirAndCopyFiles(nextJob);
+        final Runtime re = Runtime.getRuntime();
+        //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
+        String c = "docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " /io/" + Long.toString(nextJob.getId());
+        System.out.println(c);
+        final Process command = re.exec(c);
+        // Wait for the application to Fin
+        command.waitFor();
 
-            try {
-                createDirAndCopyFiles(nextJob);
-                final Runtime re = Runtime.getRuntime();
-                //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
-                String c = "docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " /io/" + Long.toString(nextJob.getId());
-                System.out.println(c);
-                final Process command = re.exec(c);
-                // Wait for the application to Fin
-                command.waitFor();
+        if (command.exitValue() != 0) {
+            throw new IOException("Failed to execute jar");
+        }else{
+            parseResults(Long.toString(nextJob.getId()));
+        }
 
-                if (command.exitValue() != 0) {
-                    throw new IOException("Failed to execute jar");
-                }else{
-                    parseResults(Long.toString(nextJob.getId()));
-                }
-            }catch (final IOException | InterruptedException | ParserConfigurationException | SAXException e){
-                System.out.println(e.getMessage());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }).start();
     }
     public static  void parseResults(String id) throws IOException, ParserConfigurationException, SAXException, SQLException {
         Document doc;
