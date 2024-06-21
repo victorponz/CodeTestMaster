@@ -3,6 +3,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import java.io.FileWriter;
+import java.nio.file.DirectoryStream;
 import java.sql.PreparedStatement;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -95,8 +96,19 @@ public class JavaCorrectorMaster {
      	Path path = Paths.get(System.getProperty("user.dir") + "/io/" + dirName);
         try {
             // Create the directory
-            Files.createDirectory(path);
-            System.out.println("Directory created successfully!");
+            if (Files.exists(path) && Files.isDirectory(path)) {
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+                    for (Path entry : stream) {
+                        if (Files.isRegularFile(entry)) {
+                            Files.delete(entry);
+                        }
+                    }
+                }
+                System.out.println("Directory exists. Contents removed");
+            } else {
+                Files.createDirectory(path);
+                System.out.println("Directory created successfully!");
+            }
 
             fw = new FileWriter(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + ".java");
             fw.write(job.getSourceCode());
