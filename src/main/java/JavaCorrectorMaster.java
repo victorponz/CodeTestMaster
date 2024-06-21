@@ -47,23 +47,26 @@ public class JavaCorrectorMaster {
         // p.waitFor();
         conf = new ConfigLoader();
         con = AppService.getConnection();
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    runDocker();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+        try (ScheduledExecutorService executor = Executors.newScheduledThreadPool(1)) {
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        runDocker();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-        };
+            };
 
-        // Schedule the task to run every second
-        executor.scheduleAtFixedRate(task, 0, 100, TimeUnit.MILLISECONDS);
+            // Schedule the task to run 100 milliseconds
+            executor.scheduleAtFixedRate(task, 0, 100, TimeUnit.MILLISECONDS);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
 
-        
+
     }
     public static Job getNextJob() throws SQLException {
 
