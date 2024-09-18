@@ -22,19 +22,20 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-public class JavaCorrectorMaster {
+public class CodeTestMaster {
     private enum RESULTCODE{
         OK,
         COMPILE_ERROR,
+        COMPILE_TEST_ERROR,
         TEST_ERROR
     }
     private static ConfigLoader conf;
     private static java.sql.Connection con;
-    private static final Logger logger = LogManager.getLogger(JavaCorrectorMaster.class);
+    private static final Logger logger = LogManager.getLogger(CodeTestMaster.class);
 
     public static void main(String[] args) throws SQLException {
 
-        /*Va a haber un ciclo continuo
+        /* Va a haber un ciclo continuo
         Si hay algo que hacer:
         1.- Se crea un hilo
         2.- Se ejecuta un docker 
@@ -99,7 +100,7 @@ public class JavaCorrectorMaster {
         String dirName = Long.toString(job.getId());
         String className = job.getProgram().getClassName();
         FileWriter fw = null;
-     	Path path = Paths.get(System.getProperty("user.dir") + "/io/" + dirName);
+     	Path path = Paths.get(System.getProperty("user.dir") + "/" + dirName);
         try {
             // Create the directory
             if (Files.exists(path) && Files.isDirectory(path)) {
@@ -118,10 +119,10 @@ public class JavaCorrectorMaster {
                 System.out.println("Directory created successfully!");
             }
 
-            fw = new FileWriter(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + ".java");
+            fw = new FileWriter(System.getProperty("user.dir") + "/" + dirName + "/" +  className + ".java");
             fw.write(job.getSourceCode());
             fw.close();
-            fw = new FileWriter(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + "Test.java");
+            fw = new FileWriter(System.getProperty("user.dir") + "/" + dirName + "/" +  className + "Test.java");
             fw.write(job.getProgram().getSourceCodeTest());
             fw.close();
             //Path source = Paths.get(System.getProperty("user.dir") + "/" + className + ".java");
@@ -156,7 +157,8 @@ public class JavaCorrectorMaster {
         createDirAndCopyFiles(nextJob);
         final Runtime re = Runtime.getRuntime();
         //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
-        String c = "docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program + " /io/" + Long.toString(nextJob.getId());
+        //docker run --rm -v /home/victorponz/Documentos/repos/code-test/CodeTestMaster/2:/2/ --name codetestrunner codetestrunner Ejemplo3 /2
+        String c = "docker run --rm -v " + System.getProperty("user.dir") + "/" + nextJob.getId() + ":/" + nextJob.getId() + "/ --name codetestrunner codetestrunner " + program + " /" + nextJob.getId();
         System.out.println(c);
         final Process command = re.exec(c);
         // Wait for the application to Fin
@@ -173,7 +175,7 @@ public class JavaCorrectorMaster {
     public static  void parseResults(String id) throws IOException, ParserConfigurationException, SAXException, SQLException {
         Document doc;
         Element root;
-        doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(System.getProperty("user.dir") + "/io/" + id + "/results.xml");
+        doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(System.getProperty("user.dir") + "/" + id + "/results.xml");
         root = doc.getDocumentElement(); // apuntarà al elemento raíz.
         int resultCodeInt = Integer.parseInt(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
         System.out.println(resultCodeInt);
@@ -184,6 +186,7 @@ public class JavaCorrectorMaster {
 
         // resultCode = RESULTCODE.OK => Correcto
         // resultCode = RESULTCODE.COMPILE_ERROR => No compila. Los errores están en el tag <error>
+        // resultcode = RESULTCODE.COMPILE_TEST_ERROR => No compila el test. Los errores están en el tag <error>
         // resultCode = RESULTCODE.TEST_ERROR => Error en el test. Los errores están en el tag <error>
         updateJob(Long.parseLong(id), resultCodeInt, error);
 
