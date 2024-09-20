@@ -32,7 +32,7 @@ public class CodeTestMaster {
     private static ConfigLoader conf;
     private static java.sql.Connection con;
     private static final Logger logger = LogManager.getLogger(CodeTestMaster.class);
-
+    private static final String OUTPUT_DIRECTORY = "io/";
     public static void main(String[] args) throws SQLException {
 
         /* Va a haber un ciclo continuo
@@ -97,7 +97,7 @@ public class CodeTestMaster {
         return job;
     }
     private static void createDirAndCopyFiles(Job job) throws IOException{
-        String dirName = Long.toString(job.getId());
+        String dirName = OUTPUT_DIRECTORY + job.getId();
         String className = job.getProgram().getClassName();
         FileWriter fw = null;
      	Path path = Paths.get(System.getProperty("user.dir") + "/" + dirName);
@@ -157,11 +157,10 @@ public class CodeTestMaster {
         createDirAndCopyFiles(nextJob);
         final Runtime re = Runtime.getRuntime();
         //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
-        //docker run --rm -v /home/victorponz/Documentos/repos/code-test/CodeTestMaster/2:/2/ --name codetestrunner codetestrunner Ejemplo3 /2
-        String c = "docker run --rm -v " + System.getProperty("user.dir") + "/" + nextJob.getId() + ":/" + nextJob.getId() + "/ --name codetestrunner codetestrunner " + program + " /" + nextJob.getId();
-        System.out.println(c);
+        String c = "docker run --rm -v " + System.getProperty("user.dir") + "/" + OUTPUT_DIRECTORY +  nextJob.getId() + ":/"
+                + OUTPUT_DIRECTORY +  nextJob.getId() + "/ --name codetestrunner codetestrunner " + program + " /" + OUTPUT_DIRECTORY + nextJob.getId();
         final Process command = re.exec(c);
-        // Wait for the application to Fin
+        // Wait for the application to Finish
         command.waitFor();
 
         if (command.exitValue() != 0) {
@@ -171,6 +170,7 @@ public class CodeTestMaster {
             parseResults(Long.toString(nextJob.getId()));
         }
         logger.info("JobId " + nextJob.getId() + " - ended successfully");
+
     }
     public static  void parseResults(String id) throws IOException, ParserConfigurationException, SAXException, SQLException {
         Document doc;

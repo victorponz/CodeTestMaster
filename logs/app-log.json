@@ -1,76 +1,38 @@
 [
-
-]
 {
   "instant" : {
-    "epochSecond" : 1726652343,
-    "nanoOfSecond" : 722548362
+    "epochSecond" : 1726813237,
+    "nanoOfSecond" : 39954991
   },
   "thread" : "pool-2-thread-1",
   "level" : "INFO",
   "loggerName" : "CodeTestMaster",
-  "message" : "JobId 1 - Directory exists. Contents removed",
+  "message" : "JobId 2 - Directory created successfully",
   "endOfBatch" : false,
   "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 28,
+  "threadId" : 29,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1726813241,
+    "nanoOfSecond" : 347325016
+  },
+  "thread" : "pool-2-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 2 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 29,
   "threadPriority" : 5
 }
 
 ]
 {
   "instant" : {
-    "epochSecond" : 1726652410,
-    "nanoOfSecond" : 550872710
-  },
-  "thread" : "pool-2-thread-1",
-  "level" : "INFO",
-  "loggerName" : "CodeTestMaster",
-  "message" : "JobId 1 - Directory exists. Contents removed",
-  "endOfBatch" : false,
-  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 32,
-  "threadPriority" : 5
-}
-
-]
-
-]
-{
-  "instant" : {
-    "epochSecond" : 1726652548,
-    "nanoOfSecond" : 56962891
-  },
-  "thread" : "pool-2-thread-1",
-  "level" : "INFO",
-  "loggerName" : "CodeTestMaster",
-  "message" : "JobId 1 - Directory exists. Contents removed",
-  "endOfBatch" : false,
-  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 32,
-  "threadPriority" : 5
-}
-
-]
-{
-  "instant" : {
-    "epochSecond" : 1726652611,
-    "nanoOfSecond" : 868886829
-  },
-  "thread" : "pool-2-thread-1",
-  "level" : "INFO",
-  "loggerName" : "CodeTestMaster",
-  "message" : "JobId 1 - Directory exists. Contents removed",
-  "endOfBatch" : false,
-  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 32,
-  "threadPriority" : 5
-}
-
-]
-{
-  "instant" : {
-    "epochSecond" : 1726652754,
-    "nanoOfSecond" : 504589422
+    "epochSecond" : 1726813507,
+    "nanoOfSecond" : 337372860
   },
   "thread" : "pool-2-thread-1",
   "level" : "INFO",
@@ -83,8 +45,8 @@
 }
 , {
   "instant" : {
-    "epochSecond" : 1726652755,
-    "nanoOfSecond" : 816488923
+    "epochSecond" : 1726813508,
+    "nanoOfSecond" : 944785950
   },
   "thread" : "pool-2-thread-1",
   "level" : "INFO",
@@ -99,36 +61,8 @@
 ]
 {
   "instant" : {
-    "epochSecond" : 1726652887,
-    "nanoOfSecond" : 419955772
-  },
-  "thread" : "pool-2-thread-1",
-  "level" : "INFO",
-  "loggerName" : "CodeTestMaster",
-  "message" : "JobId 1 - Directory exists. Contents removed",
-  "endOfBatch" : false,
-  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 32,
-  "threadPriority" : 5
-}
-, {
-  "instant" : {
-    "epochSecond" : 1726652903,
-    "nanoOfSecond" : 60426866
-  },
-  "thread" : "pool-2-thread-1",
-  "level" : "INFO",
-  "loggerName" : "CodeTestMaster",
-  "message" : "JobId 1 - ended successfully",
-  "endOfBatch" : false,
-  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 32,
-  "threadPriority" : 5
-}
-, {
-  "instant" : {
-    "epochSecond" : 1726652908,
-    "nanoOfSecond" : 210960541
+    "epochSecond" : 1726813529,
+    "nanoOfSecond" : 534160902
   },
   "thread" : "pool-2-thread-1",
   "level" : "INFO",
@@ -141,8 +75,8 @@
 }
 , {
   "instant" : {
-    "epochSecond" : 1726652926,
-    "nanoOfSecond" : 465851317
+    "epochSecond" : 1726813634,
+    "nanoOfSecond" : 668174740
   },
   "thread" : "pool-2-thread-1",
   "level" : "INFO",
@@ -155,3 +89,61 @@
 }
 
 ]
+{
+  "instant" : {
+    "epochSecond" : 1726813685,
+    "nanoOfSecond" : 583652387
+  },
+  "thread" : "pool-2-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 2 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 28,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1726813687,
+    "nanoOfSecond" : 414797089
+  },
+  "thread" : "pool-2-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 2 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 28,
+  "threadPriority" : 5
+}
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1726814111,
+    "nanoOfSecond" : 61795825
+  },
+  "thread" : "pool-2-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 2 - Directory created successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 32,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1726814167,
+    "nanoOfSecond" : 49790437
+  },
+  "thread" : "pool-2-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 2 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 32,
+  "threadPriority" : 5
+}
