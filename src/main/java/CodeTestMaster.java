@@ -16,9 +16,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,45 +32,42 @@ public class CodeTestMaster {
     private static java.sql.Connection con;
     private static final Logger logger = LogManager.getLogger(CodeTestMaster.class);
     private static final String OUTPUT_DIRECTORY = "io/";
-    public static void main(String[] args) throws SQLException {
 
-        /* Va a haber un ciclo continuo
-        Si hay algo que hacer:
-        1.- Se crea un hilo
-        2.- Se ejecuta un docker 
-        3.- Se parsea la salida de este docker    
-        */
-        // ProcessBuilder pb = new ProcessBuilder("docker", "run", "--rm", "myimage");
-        // pb.redirectErrorStream(true);
-        // Process p = pb.start();
-        // InputStream is = p.getInputStream();
-        // BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        // String line;
-        // while ((line = reader.readLine()) != null) {
-        //     System.out.println(line);
-        // }
-        // p.waitFor();
+    public static void main(String[] args) {
         conf = new ConfigLoader();
         con = AppService.getConnection();
+        // Create a scheduled executor service
+        //TOSO Configurable corePoolSize
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
 
-        try {
-            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            Runnable task = () -> {
+        // Schedule a task to run periodically (every 1 second)
+        ScheduledFuture<?> scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
+            ExecutorService singleTaskExecutor = Executors.newSingleThreadExecutor();
+            Future<?> future = singleTaskExecutor.submit(() -> {
                 try {
                     runDocker();
+                } catch (InterruptedException e) {
+                    System.out.println("Task was interrupted!");
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    //TODO Arreglar las interrupciones
+                    System.out.println(e.getMessage());
                 }
-            };
+            });
 
-            // Schedule the task to run 100 milliseconds
-            executor.scheduleAtFixedRate(task, 0, 100, TimeUnit.MILLISECONDS);
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-
-
+            // Set a time limit of 2 seconds for the task
+            try {
+                future.get(2, TimeUnit.SECONDS); // Wait for task to complete with a timeout
+            } catch (TimeoutException e) {
+                System.out.println("Task timed out. Cancelling...");
+                future.cancel(true); // Cancel the task if it exceeds the time limit
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                singleTaskExecutor.shutdown();
+            }
+        }, 0, 1, TimeUnit.SECONDS);
     }
+
     public static Job getNextJob() throws SQLException {
 
         Program program = null;
@@ -175,7 +171,7 @@ public class CodeTestMaster {
     public static  void parseResults(String id) throws IOException, ParserConfigurationException, SAXException, SQLException {
         Document doc;
         Element root;
-        doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(System.getProperty("user.dir") + "/" + id + "/results.xml");
+        doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(System.getProperty("user.dir") + "/" + OUTPUT_DIRECTORY + id + "/results.xml");
         root = doc.getDocumentElement(); // apuntarà al elemento raíz.
         int resultCodeInt = Integer.parseInt(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
         System.out.println(resultCodeInt);
