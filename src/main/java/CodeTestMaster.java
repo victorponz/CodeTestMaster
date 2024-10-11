@@ -28,20 +28,20 @@ public class CodeTestMaster {
         COMPILE_TEST_ERROR,
         TEST_ERROR
     }
-    private static ConfigLoader conf;
+
     private static java.sql.Connection con;
     private static final Logger logger = LogManager.getLogger(CodeTestMaster.class);
     private static final String OUTPUT_DIRECTORY = "io/";
 
     public static void main(String[] args) {
-        conf = new ConfigLoader();
+        ConfigLoader conf = new ConfigLoader();
         con = AppService.getConnection();
         // Create a scheduled executor service
-        //TOSO Configurable corePoolSize
+        //TODO Configurable corePoolSize
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
 
         // Schedule a task to run periodically (every 1 second)
-        ScheduledFuture<?> scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
+        scheduler.scheduleAtFixedRate(() -> {
             ExecutorService singleTaskExecutor = Executors.newSingleThreadExecutor();
             Future<?> future = singleTaskExecutor.submit(() -> {
                 try {
@@ -65,12 +65,12 @@ public class CodeTestMaster {
             } finally {
                 singleTaskExecutor.shutdown();
             }
-        }, 0, 1, TimeUnit.SECONDS);
+        }, 0, 2, TimeUnit.SECONDS);
     }
 
     public static Job getNextJob() throws SQLException {
 
-        Program program = null;
+        Program program;
         Job job = null;
         Statement st = con.createStatement();
         Statement stJob = con.createStatement();
@@ -79,7 +79,7 @@ public class CodeTestMaster {
         //Ejecutar la consulta, guardando los datos devueltos en un Resulset
         ResultSet rs = stJob.executeQuery("SELECT * FROM jobs WHERE status = 0 LIMIT 1");
         if (rs.next()){
-            ResultSet rsProgram = st.executeQuery("SELECT * FROM programs WHERE id = " + rs.getLong("id_program"));;
+            ResultSet rsProgram = st.executeQuery("SELECT * FROM programs WHERE id = " + rs.getLong("id_program"));
             if (rsProgram.next()){
                 program = new Program(rsProgram.getInt("id"),
                         rsProgram.getString("class_name"),
@@ -175,7 +175,7 @@ public class CodeTestMaster {
         root = doc.getDocumentElement(); // apuntarà al elemento raíz.
         int resultCodeInt = Integer.parseInt(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
         System.out.println(resultCodeInt);
-        RESULTCODE resultCode = RESULTCODE.values()[resultCodeInt];
+
         String error = "";
         if (root.getElementsByTagName("error").getLength() > 0)
             error = root.getElementsByTagName("error").item(0).getFirstChild().getNodeValue();
@@ -188,8 +188,7 @@ public class CodeTestMaster {
 
     }
     private static void updateJob(long id, int resultCode, String error) throws SQLException {
-        ResultSet rs;
-        PreparedStatement st = null;
+        PreparedStatement st;
         String query = "UPDATE jobs SET status = 2, result_code = ?, error = ? WHERE id = ?";
         st = con.prepareStatement(query);
         st.setInt(1, resultCode);
@@ -199,8 +198,7 @@ public class CodeTestMaster {
         st.executeUpdate();
     }
     private static void updateJobInProgress(long id) throws SQLException {
-        ResultSet rs;
-        PreparedStatement st = null;
+        PreparedStatement st;
         String query = "UPDATE jobs SET status = 1 WHERE id = ?";
         st = con.prepareStatement(query);
         st.setLong(1, id);

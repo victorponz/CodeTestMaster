@@ -1,5 +1,5 @@
 public class Job {
-    private long id;
+    private long  id;
 
     private String sourceCode;
     private String error;
@@ -12,7 +12,7 @@ public class Job {
         this.program = program;
     }
 
-    public long getId() {
+    public synchronized long  getId() {
         return id;
     }
 
