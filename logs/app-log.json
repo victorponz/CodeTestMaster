@@ -1,13 +1,13 @@
 [
 {
   "instant" : {
-    "epochSecond" : 1728639027,
-    "nanoOfSecond" : 827834357
+    "epochSecond" : 1731493560,
+    "nanoOfSecond" : 776600347
   },
   "thread" : "pool-3-thread-1",
   "level" : "INFO",
   "loggerName" : "CodeTestMaster",
-  "message" : "JobId 3 - Directory exists. Contents removed",
+  "message" : "JobId 1 - Directory exists. Contents removed",
   "endOfBatch" : false,
   "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
   "threadId" : 31,
@@ -15,13 +15,13 @@
 }
 , {
   "instant" : {
-    "epochSecond" : 1728639029,
-    "nanoOfSecond" : 767717261
+    "epochSecond" : 1731493563,
+    "nanoOfSecond" : 245690701
   },
   "thread" : "pool-4-thread-1",
   "level" : "INFO",
   "loggerName" : "CodeTestMaster",
-  "message" : "JobId 4 - Directory exists. Contents removed",
+  "message" : "JobId 2 - Directory exists. Contents removed",
   "endOfBatch" : false,
   "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
   "threadId" : 34,
@@ -29,73 +29,191 @@
 }
 , {
   "instant" : {
-    "epochSecond" : 1728639029,
-    "nanoOfSecond" : 881898717
+    "epochSecond" : 1731493563,
+    "nanoOfSecond" : 300433894
   },
   "thread" : "pool-4-thread-1",
   "level" : "ERROR",
   "loggerName" : "CodeTestMaster",
-  "message" : "JobId 4 - to execute jar",
+  "message" : "JobId 2 - to execute jar",
   "endOfBatch" : false,
   "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
   "threadId" : 34,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1731493564,
+    "nanoOfSecond" : 790988183
+  },
+  "thread" : "pool-5-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 3 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 37,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1731493566,
+    "nanoOfSecond" : 249347477
+  },
+  "thread" : "pool-5-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 3 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 37,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1731493566,
+    "nanoOfSecond" : 775759258
+  },
+  "thread" : "pool-6-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 39,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1731493568,
+    "nanoOfSecond" : 18227167
+  },
+  "thread" : "pool-6-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 39,
   "threadPriority" : 5
 }
 
 ]
 {
   "instant" : {
-    "epochSecond" : 1728639186,
-    "nanoOfSecond" : 123488561
+    "epochSecond" : 1731493647,
+    "nanoOfSecond" : 906801540
   },
   "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 1 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 31,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1731493649,
+    "nanoOfSecond" : 730843717
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 1 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 31,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1731493649,
+    "nanoOfSecond" : 881936275
+  },
+  "thread" : "pool-4-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 2 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 34,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1731493651,
+    "nanoOfSecond" : 323913696
+  },
+  "thread" : "pool-4-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 2 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 34,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1731493651,
+    "nanoOfSecond" : 892396565
+  },
+  "thread" : "pool-5-thread-1",
   "level" : "INFO",
   "loggerName" : "CodeTestMaster",
   "message" : "JobId 3 - Directory exists. Contents removed",
   "endOfBatch" : false,
   "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 30,
+  "threadId" : 36,
   "threadPriority" : 5
 }
 , {
   "instant" : {
-    "epochSecond" : 1728639187,
-    "nanoOfSecond" : 746491682
+    "epochSecond" : 1731493653,
+    "nanoOfSecond" : 233728735
   },
-  "thread" : "pool-3-thread-1",
+  "thread" : "pool-5-thread-1",
   "level" : "INFO",
   "loggerName" : "CodeTestMaster",
   "message" : "JobId 3 - ended successfully",
   "endOfBatch" : false,
   "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 30,
+  "threadId" : 36,
   "threadPriority" : 5
 }
 , {
   "instant" : {
-    "epochSecond" : 1728639188,
-    "nanoOfSecond" : 114650685
+    "epochSecond" : 1731493653,
+    "nanoOfSecond" : 901212172
   },
-  "thread" : "pool-4-thread-1",
+  "thread" : "pool-6-thread-1",
   "level" : "INFO",
   "loggerName" : "CodeTestMaster",
   "message" : "JobId 4 - Directory exists. Contents removed",
   "endOfBatch" : false,
   "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 34,
+  "threadId" : 38,
   "threadPriority" : 5
 }
 , {
   "instant" : {
-    "epochSecond" : 1728639189,
-    "nanoOfSecond" : 364574882
+    "epochSecond" : 1731493655,
+    "nanoOfSecond" : 126944644
   },
-  "thread" : "pool-4-thread-1",
+  "thread" : "pool-6-thread-1",
   "level" : "INFO",
   "loggerName" : "CodeTestMaster",
   "message" : "JobId 4 - ended successfully",
   "endOfBatch" : false,
   "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
-  "threadId" : 34,
+  "threadId" : 38,
   "threadPriority" : 5
 }
+
+]
+
+]
+
+]
