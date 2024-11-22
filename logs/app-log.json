@@ -99,3 +99,171 @@
   "threadId" : 34,
   "threadPriority" : 5
 }
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1728641469,
+    "nanoOfSecond" : 247676732
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "ERROR",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Failed to create directory: /home/alumno/Documentos/codetest/CodeTestMaster/io/4",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 18,
+  "threadPriority" : 5
+}
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1728641526,
+    "nanoOfSecond" : 89483184
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "ERROR",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Failed to create directory: /home/alumno/Documentos/codetest/CodeTestMaster/io/4/results.xml",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 18,
+  "threadPriority" : 5
+}
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1728641601,
+    "nanoOfSecond" : 965028922
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "ERROR",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Failed to create directory: /home/alumno/Documentos/codetest/CodeTestMaster/io/4/results.xml",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 18,
+  "threadPriority" : 5
+}
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1728641728,
+    "nanoOfSecond" : 307251567
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Directory created successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 18,
+  "threadPriority" : 5
+}
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1728641793,
+    "nanoOfSecond" : 141443047
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 18,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1728641798,
+    "nanoOfSecond" : 848790577
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 18,
+  "threadPriority" : 5
+}
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1728642743,
+    "nanoOfSecond" : 836676970
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 23,
+  "threadPriority" : 5
+}
+, {
+  "instant" : {
+    "epochSecond" : 1728642752,
+    "nanoOfSecond" : 41421233
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - ended successfully",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 23,
+  "threadPriority" : 5
+}
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1728642979,
+    "nanoOfSecond" : 825824198
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 18,
+  "threadPriority" : 5
+}
+
+]
+{
+  "instant" : {
+    "epochSecond" : 1728643086,
+    "nanoOfSecond" : 209657696
+  },
+  "thread" : "pool-3-thread-1",
+  "level" : "INFO",
+  "loggerName" : "CodeTestMaster",
+  "message" : "JobId 4 - Directory exists. Contents removed",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.apache.logging.log4j.spi.AbstractLogger",
+  "threadId" : 18,
+  "threadPriority" : 5
+}
+
+]
+
+]
+
+]
+
+]
+
+]
+
+]
