@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 import org.apache.logging.log4j.LogManager;
@@ -43,23 +42,21 @@ public class CodeTestMaster {
 
         // Schedule a task to run periodically (every 1 second)
         scheduler.scheduleAtFixedRate(() -> {
-            Job nextJob;
-            AtomicReference<Job> next = new AtomicReference<>();
             ExecutorService singleTaskExecutor = Executors.newSingleThreadExecutor();
             Future<?> future = singleTaskExecutor.submit(() -> {
                 try {
-                    next.set(getNextJob());
-                    runDocker(next.get());
+                    runDocker();
                 } catch (InterruptedException e) {
                     System.out.println("Task was interrupted!");
                 } catch (Exception e) {
-                    // TODO Arreglar las interrupciones
+                    //TODO Arreglar las interrupciones
                     System.out.println(e.getMessage());
                 }
             });
+
             // Set a time limit of 2 seconds for the task
             try {
-                future.get(1, TimeUnit.MILLISECONDS); // Wait for task to complete with a timeout
+                future.get(2, TimeUnit.SECONDS); // Wait for task to complete with a timeout
             } catch (TimeoutException e) {
                 System.out.println("Task timed out. Cancelling...");
                 future.cancel(true); // Cancel the task if it exceeds the time limit
@@ -68,7 +65,7 @@ public class CodeTestMaster {
             } finally {
                 singleTaskExecutor.shutdown();
             }
-        }, 0, 250, TimeUnit.MILLISECONDS);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     public static Job getNextJob() throws SQLException {
@@ -146,9 +143,9 @@ public class CodeTestMaster {
             }
         }
     }
-    private static void runDocker(Job nextJob) throws SQLException, IOException, InterruptedException, ParserConfigurationException, SAXException {
+    private static void runDocker() throws SQLException, IOException, InterruptedException, ParserConfigurationException, SAXException {
 
-
+        final Job nextJob = getNextJob();
 
         if (nextJob == null) return;
         final String program = nextJob.getProgram().getClassName();
