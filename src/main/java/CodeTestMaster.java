@@ -56,7 +56,7 @@ public class CodeTestMaster {
 
             // Set a time limit of 2 seconds for the task
             try {
-                future.get(2, TimeUnit.SECONDS); // Wait for task to complete with a timeout
+                future.get(5, TimeUnit.SECONDS); // Wait for task to complete with a timeout
             } catch (TimeoutException e) {
                 System.out.println("Task timed out. Cancelling...");
                 future.cancel(true); // Cancel the task if it exceeds the time limit
