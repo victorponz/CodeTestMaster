@@ -45,7 +45,8 @@ public class CodeTestMaster {
             ExecutorService singleTaskExecutor = Executors.newSingleThreadExecutor();
             Future<?> future = singleTaskExecutor.submit(() -> {
                 try {
-                    runDocker();
+                    Job job = getNextJob();
+                    runDocker(job);
                 } catch (InterruptedException e) {
                     System.out.println("Task was interrupted!");
                 } catch (Exception e) {
@@ -68,7 +69,7 @@ public class CodeTestMaster {
         }, 0, 1, TimeUnit.SECONDS);
     }
 
-    public static Job getNextJob() throws SQLException {
+    public static synchronized Job getNextJob() throws SQLException {
 
         Program program;
         Job job = null;
@@ -143,9 +144,9 @@ public class CodeTestMaster {
             }
         }
     }
-    private static void runDocker() throws SQLException, IOException, InterruptedException, ParserConfigurationException, SAXException {
+    private static void runDocker(Job nextJob) throws SQLException, IOException, InterruptedException, ParserConfigurationException, SAXException {
 
-        final Job nextJob = getNextJob();
+        //final Job nextJob = getNextJob();
 
         if (nextJob == null) return;
         final String program = nextJob.getProgram().getClassName();
