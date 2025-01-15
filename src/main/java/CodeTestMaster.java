@@ -23,10 +23,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 public class CodeTestMaster {
     private enum RESULTCODE{
-        OK,
-        COMPILE_ERROR,
-        COMPILE_TEST_ERROR,
-        TEST_ERROR
+        OK(0),
+        COMPILE_ERROR(1),
+        COMPILE_TEST_ERROR(2),
+        TEST_ERROR(3),
+        TIMEOUT_ERROR(4),
+        FATAL_ERROR(5);
+
+        private final int code;
+
+        // Constructor to set the integer value
+        RESULTCODE(int code) {
+            this.code = code;
+        }
+
+        // Getter to retrieve the integer value
+        public int getCode() {
+            return code;
+        }
     }
 
     private static java.sql.Connection con;
@@ -42,34 +56,79 @@ public class CodeTestMaster {
 
         // Schedule a task to run periodically (every 1 second)
         scheduler.scheduleAtFixedRate(() -> {
-            ExecutorService singleTaskExecutor = Executors.newSingleThreadExecutor();
-            Future<?> future = singleTaskExecutor.submit(() -> {
-                try {
-                    Job job = getNextJob();
-                    runDocker(job);
-                } catch (InterruptedException e) {
-                    System.out.println("Task was interrupted!");
-                } catch (Exception e) {
-                    //TODO Arreglar las interrupciones
-                    System.out.println(e.getMessage());
-                }
-            });
-
-            // Set a time limit of 2 seconds for the task
             try {
-                future.get(5, TimeUnit.SECONDS); // Wait for task to complete with a timeout
-            } catch (TimeoutException e) {
-                System.out.println("Task timed out. Cancelling...");
-                future.cancel(true); // Cancel the task if it exceeds the time limit
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                singleTaskExecutor.shutdown();
+                ExecutorService singleTaskExecutor = Executors.newSingleThreadExecutor();
+                Future<Job> future = singleTaskExecutor.submit(() -> {
+                    Job job = null;
+
+                    try {
+                        // Step 1: Get the next job
+                        job = getNextJob();
+
+                        if (job == null) {
+                            System.out.println("No job available.");
+                            return null; // Return null if no job is found
+                        }
+                        System.out.println("Processing job with id " + job.getId());
+                        // Step 2: Process the job (run Docker)
+                        runDocker(job);
+
+                        // Step 3: Return the job after successful execution
+                        return job;
+
+                    } catch (SQLException e) {
+                        System.err.println("SQL Exception: " + e.getMessage());
+                        throw new RuntimeException("Database error while processing the job.", e);
+                    } catch (InterruptedException e) {
+                        if (job != null) {
+                            try {
+                                updateJob(job.getId(), RESULTCODE.TIMEOUT_ERROR.getCode(), "Timeout!");
+                            } catch (SQLException ex) {
+                                System.err.println("Failed to update job with timeout error: " + ex.getMessage());
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                        throw new RuntimeException("Task was interrupted.", e);
+                    } catch (Exception e) {
+                        if (job != null) {
+                            try {
+                                updateJob(job.getId(), RESULTCODE.FATAL_ERROR.getCode(), e.getMessage());
+                            } catch (SQLException ex) {
+                                System.err.println("Failed to update job with fatal error: " + ex.getMessage());
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                        throw new RuntimeException("Unexpected error during task execution.", e);
+                    }
+                });
+
+                Job job = null;
+                try {
+                    // Set a time limit for the task to complete
+                    job = future.get(5, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    if (job != null) {
+                        try {
+                            updateJob(job.getId(), RESULTCODE.TIMEOUT_ERROR.getCode(), "Task timed out!");
+                        } catch (SQLException ex) {
+                            System.err.println("Failed to update job with timeout error: " + ex.getMessage());
+                        }
+                    }
+                    System.out.println("Task timed out. Cancelling...");
+                    future.cancel(true); // Cancel the task if it exceeds the time limit
+                } catch (ExecutionException | InterruptedException e) {
+                    System.err.println("Error during task execution: " + e.getMessage());
+                } finally {
+                    singleTaskExecutor.shutdown();
+                }
+            } catch (Exception e) {
+                System.err.println("Exception in scheduled task: " + e.getMessage());
             }
         }, 0, 1, TimeUnit.SECONDS);
+
     }
 
-    public static synchronized Job getNextJob() throws SQLException {
+    public static  Job getNextJob() throws SQLException {
 
         Program program;
         Job job = null;
@@ -91,6 +150,7 @@ public class CodeTestMaster {
             }
         }
         rs.close();
+
         return job;
     }
     private static void createDirAndCopyFiles(Job job) throws IOException{
@@ -109,11 +169,11 @@ public class CodeTestMaster {
                     }
                 }
                 logger.info("JobId " + job.getId() +  " - Directory exists. Contents removed");
-                System.out.println("Directory exists. Contents removed");
+                //System.out.println("Directory exists. Contents removed");
             } else {
                 Files.createDirectory(path);
                 logger.info("JobId " + job.getId() +  " - Directory created successfully");
-                System.out.println("Directory created successfully!");
+                //System.out.println("Directory created successfully!");
             }
 
             fw = new FileWriter(System.getProperty("user.dir") + "/" + dirName + "/" +  className + ".java");
@@ -122,13 +182,7 @@ public class CodeTestMaster {
             fw = new FileWriter(System.getProperty("user.dir") + "/" + dirName + "/" +  className + "Test.java");
             fw.write(job.getProgram().getSourceCodeTest());
             fw.close();
-            //Path source = Paths.get(System.getProperty("user.dir") + "/" + className + ".java");
-            //Path target = Paths.get(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + ".java");
-            //Files.copy(source, target);
-           	
-            //source = Paths.get(System.getProperty("user.dir") + "/" + className + "Test.java");
-            //target = Paths.get(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + "Test.java");
-            //Files.copy(source, target);
+
         } catch (IOException e) {
             // Handle the error
             logger.error("JobId " + job.getId() +  " - Failed to create directory: " + e.getMessage());
@@ -145,10 +199,7 @@ public class CodeTestMaster {
         }
     }
     private static void runDocker(Job nextJob) throws SQLException, IOException, InterruptedException, ParserConfigurationException, SAXException {
-
-        //final Job nextJob = getNextJob();
-
-        if (nextJob == null) return;
+    if (nextJob == null) return;
         final String program = nextJob.getProgram().getClassName();
         updateJobInProgress(nextJob.getId());
         createDirAndCopyFiles(nextJob);
@@ -159,7 +210,6 @@ public class CodeTestMaster {
         final Process command = re.exec(c);
         // Wait for the application to Finish
         command.waitFor();
-
         if (command.exitValue() != 0) {
             logger.error("JobId " + nextJob.getId() +  " - to execute jar");
             throw new IOException("Failed to execute jar");
