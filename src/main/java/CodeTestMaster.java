@@ -69,7 +69,9 @@ public class CodeTestMaster {
                             System.out.println("No job available.");
                             return null; // Return null if no job is found
                         }
-                        System.out.println("Processing job with id " + job.getId());
+                        //System.out.println("Processing job with id " + job.getId());
+                        logger.info("Processing job with id " + job.getId());
+
                         // Step 2: Process the job (run Docker)
                         runDocker(job);
 
@@ -77,52 +79,53 @@ public class CodeTestMaster {
                         return job;
 
                     } catch (SQLException e) {
-                        System.err.println("SQL Exception: " + e.getMessage());
-                        throw new RuntimeException("Database error while processing the job.", e);
+                        logger.error("JobId " + job.getId() +  " - Database error while processing the job " + e.getMessage());
+                        return job;
                     } catch (InterruptedException e) {
                         if (job != null) {
                             try {
                                 updateJob(job.getId(), RESULTCODE.TIMEOUT_ERROR.getCode(), "Timeout!");
                             } catch (SQLException ex) {
-                                System.err.println("Failed to update job with timeout error: " + ex.getMessage());
-                                throw new RuntimeException(ex);
+                                logger.error("JobId " + job.getId() +  " - failed to update job with timeout error " + ex.getMessage());
                             }
+                            return job;
                         }
-                        throw new RuntimeException("Task was interrupted.", e);
+                        return null;
                     } catch (Exception e) {
                         if (job != null) {
                             try {
                                 updateJob(job.getId(), RESULTCODE.FATAL_ERROR.getCode(), e.getMessage());
                             } catch (SQLException ex) {
-                                System.err.println("Failed to update job with fatal error: " + ex.getMessage());
+                                logger.error("JobId " + job.getId() +  " - failed to update job with sql error " + ex.getMessage());
                                 throw new RuntimeException(ex);
                             }
                         }
-                        throw new RuntimeException("Unexpected error during task execution.", e);
+                        return null;
                     }
                 });
 
                 Job job = null;
                 try {
                     // Set a time limit for the task to complete
+                    //TODO timeout configurable
                     job = future.get(5, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
                     if (job != null) {
                         try {
                             updateJob(job.getId(), RESULTCODE.TIMEOUT_ERROR.getCode(), "Task timed out!");
                         } catch (SQLException ex) {
-                            System.err.println("Failed to update job with timeout error: " + ex.getMessage());
+                            logger.error("JobId " + job.getId() +  " - failed to update job with SQL error " + ex.getMessage());
                         }
                     }
-                    System.out.println("Task timed out. Cancelling...");
                     future.cancel(true); // Cancel the task if it exceeds the time limit
                 } catch (ExecutionException | InterruptedException e) {
-                    System.err.println("Error during task execution: " + e.getMessage());
+                    logger.error("JobId " + job.getId() +  " - Error during task execution: " + e.getMessage());
                 } finally {
                     singleTaskExecutor.shutdown();
                 }
             } catch (Exception e) {
-                System.err.println("Exception in scheduled task: " + e.getMessage());
+                logger.error("Exception in scheduled task: " + e.getMessage());
+
             }
         }, 0, 1, TimeUnit.SECONDS);
 
@@ -167,18 +170,22 @@ public class CodeTestMaster {
                             Files.delete(entry);
                         }
                     }
+                }catch (IOException ioe){
+                    logger.error("JobId " + job.getId() +  " - Error creating directory");
+                    throw new IOException("JobId " + job.getId() +  " - Error creating directory");
                 }
                 logger.info("JobId " + job.getId() +  " - Directory exists. Contents removed");
                 //System.out.println("Directory exists. Contents removed");
             } else {
                 Files.createDirectory(path);
                 logger.info("JobId " + job.getId() +  " - Directory created successfully");
-                //System.out.println("Directory created successfully!");
             }
 
+            //Write the sourcecode
             fw = new FileWriter(System.getProperty("user.dir") + "/" + dirName + "/" +  className + ".java");
             fw.write(job.getSourceCode());
             fw.close();
+            //write the test unit
             fw = new FileWriter(System.getProperty("user.dir") + "/" + dirName + "/" +  className + "Test.java");
             fw.write(job.getProgram().getSourceCodeTest());
             fw.close();
@@ -199,10 +206,15 @@ public class CodeTestMaster {
         }
     }
     private static void runDocker(Job nextJob) throws SQLException, IOException, InterruptedException, ParserConfigurationException, SAXException {
-    if (nextJob == null) return;
+
+        if (nextJob == null) return;
+        //Get the classname of the program to run needed by codetestrunner docker
         final String program = nextJob.getProgram().getClassName();
+
         updateJobInProgress(nextJob.getId());
+
         createDirAndCopyFiles(nextJob);
+
         final Runtime re = Runtime.getRuntime();
         //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
         String c = "docker run --rm -v " + System.getProperty("user.dir") + "/" + OUTPUT_DIRECTORY +  nextJob.getId() + ":/"
@@ -211,7 +223,7 @@ public class CodeTestMaster {
         // Wait for the application to Finish
         command.waitFor();
         if (command.exitValue() != 0) {
-            logger.error("JobId " + nextJob.getId() +  " - to execute jar");
+            logger.error("JobId " + nextJob.getId() +  " - Failed to execute jar");
             throw new IOException("Failed to execute jar");
         }else{
             parseResults(Long.toString(nextJob.getId()));
@@ -222,10 +234,11 @@ public class CodeTestMaster {
     public static  void parseResults(String id) throws IOException, ParserConfigurationException, SAXException, SQLException {
         Document doc;
         Element root;
+
+        //The results are located in a file called results.xml generated by codetestrunner docker
         doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(System.getProperty("user.dir") + "/" + OUTPUT_DIRECTORY + id + "/results.xml");
         root = doc.getDocumentElement(); // apuntarà al elemento raíz.
         int resultCodeInt = Integer.parseInt(root.getElementsByTagName("resultcode").item(0).getFirstChild().getNodeValue());
-        System.out.println(resultCodeInt);
 
         String error = "";
         if (root.getElementsByTagName("error").getLength() > 0)
