@@ -128,7 +128,7 @@ public class CodeTestMaster {
 
     }
 
-    public static  Job getNextJob() throws SQLException {
+    public static  synchronized  Job getNextJob() throws SQLException {
 
         Program program;
         Job job = null;
