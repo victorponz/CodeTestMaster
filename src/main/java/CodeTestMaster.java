@@ -206,7 +206,7 @@ public class CodeTestMaster {
         final Runtime re = Runtime.getRuntime();
         //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
         String c = "docker run --rm -v " + System.getProperty("user.dir") + "/" + OUTPUT_DIRECTORY +  nextJob.getId() + ":/"
-                + OUTPUT_DIRECTORY +  nextJob.getId() + "/ --name codetestrunner codetestrunner " + program + " /" + OUTPUT_DIRECTORY + nextJob.getId();
+                + OUTPUT_DIRECTORY +  nextJob.getId() + " --name codetestrunner codetestrunner " + program + " /" + OUTPUT_DIRECTORY + nextJob.getId() + "/";
         final Process command = re.exec(c);
         // Wait for the application to Finish
         command.waitFor();
